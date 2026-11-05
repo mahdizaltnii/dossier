@@ -1,6 +1,20 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Docker Desktop on Windows does not reliably forward host filesystem
+  // events into the container. WATCHPACK_POLLING alone can be ignored by
+  // Next's webpack watcher, so set the poll interval on the actual compiler.
+  webpack(config, { dev }) {
+    if (dev) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        poll: 1000,
+        aggregateTimeout: 300,
+      };
+    }
+
+    return config;
+  },
   // The production image runs .next/standalone: the server and only the files
   // it needs (E12-1).
   output: "standalone",
